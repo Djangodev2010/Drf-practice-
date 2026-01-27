@@ -2,14 +2,13 @@ from rest_framework import serializers
 from .models import *
 from django.contrib.auth.models import User
 
-class CarSerializer(serializers.ModelSerializer):
+class CarSerializer(serializers.HyperlinkedModelSerializer):
     
     user = serializers.ReadOnlyField(source='user.username')
-    name = serializers.CharField()
     
     class Meta:
         model = Car
-        fields = ['name', 'user', 'color', 'price']
+        fields = ['name', 'user', 'color', 'price', 'id', 'url']
 
     def validate(self, data):
         price = data.get('price')
@@ -17,9 +16,9 @@ class CarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('The price must be greater than 1000!')
         return data
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     cars = serializers.PrimaryKeyRelatedField(many=True, queryset=Car.objects.all())
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'cars']
+        fields = ['id', 'username', 'cars', 'url']
