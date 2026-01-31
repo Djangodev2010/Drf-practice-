@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from .permissions import IsUserOrReadOnly
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
+from rest_framework import viewsets
 
 # Create your views here.
 
@@ -20,24 +21,15 @@ def api_root(request, format=None):
         }
     )
 
-class CarListView(generics.ListCreateAPIView):
-    queryset = Car.objects.all()
-    serializer_class = CarSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-class CarDetailView(generics.RetrieveUpdateDestroyAPIView):
+class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsUserOrReadOnly]
 
-class UserListView(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
-class UserDetailView(generics.RetrieveAPIView):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """This viewset will handle both retrive and list actions that too read-only"""
     queryset = User.objects.all()
-    serializer_class = UserSerializer 
-
+    serializer_class = UserSerializer
